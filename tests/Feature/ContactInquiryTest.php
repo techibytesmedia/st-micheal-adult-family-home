@@ -5,7 +5,7 @@
  *   Created by Techibytes Media Development Team
  *   Copyright Ⓒ 2026. All rights reserved, https://techibytesmedia.com/
  *   Project: st-michaels-afh
- *   Last modified: 7/20/26, 9:32 PM
+ *   Last modified: 7/20/26, 10:10 PM
  *   Modified or Created by: erigb
  *
  *   Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
@@ -21,9 +21,6 @@ declare(strict_types = 1);
 
 use App\Mail\ContactInquiryReceived;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 test('a visitor can submit a contact inquiry', function (): void {
     Mail::fake();
@@ -39,14 +36,30 @@ test('a visitor can submit a contact inquiry', function (): void {
 
     $response->assertRedirect(route('contact'))->assertSessionHas('status');
 
-    $this->assertDatabaseHas('contact_inquiries', [
+    Mail::assertSent(ContactInquiryReceived::class, fn (ContactInquiryReceived $mail) => $mail->hasTo('hodlope@aol.com')
+            && $mail->hasReplyTo('jane@example.com')
+            && 'Jane Doe' === $mail->inquiry['name']);
+});
+
+test('the inquiry email contains the submitted contact details', function (): void {
+    $mail = new ContactInquiryReceived([
         'name' => 'Jane Doe',
+        'phone' => '253-555-0100',
         'email' => 'jane@example.com',
+        'relationship_to_resident' => 'Child',
         'care_needed' => 'Long-term residential care',
+        'message' => 'I would like to schedule a visit.',
     ]);
 
-    Mail::assertSent(ContactInquiryReceived::class, fn (ContactInquiryReceived $mail) => $mail->hasTo(config('site.email'))
-            && 'Jane Doe' === $mail->inquiry->name);
+    $mail->assertSeeInHtml('Jane Doe')
+        ->assertSeeInHtml('A family has reached out')
+        ->assertSeeInHtml('253-555-0100')
+        ->assertSeeInHtml('jane@example.com')
+        ->assertSeeInHtml('Long-term residential care')
+        ->assertSeeInHtml('I would like to schedule a visit.')
+        ->assertSeeInText('NEW CARE INQUIRY')
+        ->assertSeeInText('Jane Doe')
+        ->assertSeeInText('I would like to schedule a visit.');
 });
 
 test('required fields are validated', function (string $field): void {
@@ -64,7 +77,6 @@ test('required fields are validated', function (string $field): void {
         ->assertRedirect(route('contact'))
         ->assertSessionHasErrors($field);
 
-    $this->assertDatabaseEmpty('contact_inquiries');
     Mail::assertNothingSent();
 })->with(['name', 'phone', 'email', 'message']);
 
@@ -81,7 +93,7 @@ test('an invalid email address is rejected', function (): void {
         ->assertRedirect(route('contact'))
         ->assertSessionHasErrors('email');
 
-    $this->assertDatabaseEmpty('contact_inquiries');
+    Mail::assertNothingSent();
 });
 
 test('submissions that fill the honeypot field are rejected', function (): void {
@@ -98,22 +110,18 @@ test('submissions that fill the honeypot field are rejected', function (): void 
         ->assertRedirect(route('contact'))
         ->assertSessionHasErrors('website');
 
-    $this->assertDatabaseEmpty('contact_inquiries');
     Mail::assertNothingSent();
 });
 
-test('the inquiry is still saved when the notification email fails', function (): void {
+test('a mail delivery failure is not reported as a successful submission', function (): void {
     Mail::shouldReceive('to')->once()->andThrow(new RuntimeException('SMTP down'));
 
-    $this->from(route('contact'))
-        ->post(route('contact.store'), [
-            'name' => 'Jane Doe',
-            'phone' => '253-555-0100',
-            'email' => 'jane@example.com',
-            'message' => 'Looking for care options.',
-        ])
-        ->assertRedirect(route('contact'))
-        ->assertSessionHas('status');
+    $this->withoutExceptionHandling();
 
-    $this->assertDatabaseHas('contact_inquiries', ['email' => 'jane@example.com']);
+    expect(fn () => $this->from(route('contact'))->post(route('contact.store'), [
+        'name' => 'Jane Doe',
+        'phone' => '253-555-0100',
+        'email' => 'jane@example.com',
+        'message' => 'Looking for care options.',
+    ]))->toThrow(RuntimeException::class, 'SMTP down');
 });

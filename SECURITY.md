@@ -19,17 +19,16 @@ We will acknowledge the report as soon as practical, investigate it, and provide
 
 ## Security Expectations
 
-This website accepts and stores contact inquiries that may contain personal information. Contributions must therefore:
+This website accepts contact inquiries that may contain personal information and delivers them by email. Contributions must therefore:
 
 - Use HTTPS in deployed environments
 - Validate all user input through Laravel Form Requests
 - Escape user-provided output in Blade templates
-- Authorize access to stored inquiries and administrative functionality
+- Protect inquiry data throughout email delivery
 - Preserve rate limiting and spam protection on public forms
 - Keep secrets, credentials, and `.env` files out of version control
 - Avoid logging sensitive inquiry content unless operationally necessary
 - Keep framework and frontend dependencies supported and up to date
-- Include tests for changes affecting validation, data storage, email delivery, or access control
+- Include tests for changes affecting validation, email delivery, or access control
 
 Thank you for helping protect the website and the families who contact St. Michaels Adult Family Home.
-

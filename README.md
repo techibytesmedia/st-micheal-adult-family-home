@@ -13,11 +13,11 @@ This repository contains the Laravel application, Blade views, contact-inquiry w
 
 ---
 
-## Key Features
+## Current Functionality
 
 - Informational pages for the home, services, frequently asked questions, and contact details
 - A photo-based tour featuring the home's actual living spaces
-- Contact inquiries stored in the database and delivered to the business by email
+- Contact inquiries delivered directly to the business by email
 - Server-side form validation, rate limiting, and honeypot spam protection
 - Responsive, accessible interface with light and dark color schemes
 - Local-business structured data and page-specific metadata for search engines
@@ -29,8 +29,7 @@ This repository contains the Laravel application, Blade views, contact-inquiry w
 
 - **Backend:** PHP 8.3+ and Laravel 13
 - **Frontend:** Blade, Tailwind CSS 4, and Vite 8
-- **Database:** Laravel-supported relational database
-- **Email:** Laravel Mail
+- **Email:** Laravel Mail with configurable SMTP delivery
 - **Testing:** Pest 4 and PHPUnit 12
 - **Code Style:** Laravel Pint
 
@@ -52,10 +51,9 @@ composer install
 cp .env.example .env
 php artisan key:generate
 npm install
-php artisan migrate
 ```
 
-Configure the database, mail service, application URL, and business contact email in `.env` before running the application.
+Configure the mail service, application URL, and business contact email in `.env` before running the application.
 
 ### 3. Start local development
 

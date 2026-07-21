@@ -49,7 +49,7 @@ Thank you for helping improve the St. Michaels Adult Family Home website. Contri
 
 ## Areas Requiring Extra Care
 
-- **Contact inquiries:** Preserve validation, database storage, email notification, rate limiting, and honeypot protection.
+- **Contact inquiries:** Preserve validation, email delivery, rate limiting, and honeypot protection.
 - **Privacy:** Never use real resident, family, or inquiry information in code, tests, screenshots, or discussions.
 - **Business details:** Confirm changes to the address, phone number, email address, services, or availability before merging.
 - **Search metadata:** Keep page titles, descriptions, structured data, and visible content accurate and consistent.
@@ -62,4 +62,3 @@ All contributions must pass automated tests and formatting checks and must be re
 ## Questions
 
 For development access, suggestions, or contribution questions, contact [dev@techibytesmedia.com](mailto:dev@techibytesmedia.com).
-

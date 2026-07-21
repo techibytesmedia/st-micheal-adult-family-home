@@ -5,7 +5,7 @@
  *   Created by Techibytes Media Development Team
  *   Copyright Ⓒ 2026. All rights reserved, https://techibytesmedia.com/
  *   Project: st-michaels-afh
- *   Last modified: 7/20/26, 9:30 PM
+ *   Last modified: 7/20/26, 10:01 PM
  *   Modified or Created by: erigb
  *
  *   Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
@@ -21,9 +21,6 @@ declare(strict_types = 1);
 
 namespace App\Http\Controllers;
 
-use Throwable;
-use App\Models\ContactInquiry;
-use Illuminate\Support\Facades\Log;
 use App\Mail\ContactInquiryReceived;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
@@ -33,17 +30,9 @@ class ContactInquiryController extends Controller
 {
     public function store(StoreContactInquiryRequest $request): RedirectResponse
     {
-        $inquiry = ContactInquiry::create($request->safe()->except('website'));
-
-        try {
-            Mail::to(config('site.email'))->send(new ContactInquiryReceived($inquiry));
-        } catch (Throwable $exception) {
-            // The inquiry is already saved; a mail failure should not lose the lead.
-            Log::error('Failed to send contact inquiry notification.', [
-                'inquiry_id' => $inquiry->id,
-                'exception' => $exception->getMessage(),
-            ]);
-        }
+        Mail::to(config('site.email'))->send(
+            new ContactInquiryReceived($request->safe()->except('website')),
+        );
 
         return redirect()
             ->route('contact')

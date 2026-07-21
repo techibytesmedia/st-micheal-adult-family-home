@@ -47,9 +47,20 @@
     </div>
 
     <div class="border-t border-navy-800">
-        <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-5 text-xs text-navy-300 sm:flex-row sm:px-6">
+        <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-5 text-center text-xs text-navy-300 sm:flex-row sm:px-6 sm:text-left">
             <p>&copy; {{ date('Y') }} {{ config('site.name') }}. All rights reserved.</p>
-            <p>{{ config('site.tagline') }}</p>
+            <div class="space-y-1 sm:text-right">
+                <p>{{ config('site.tagline') }}</p>
+                <p>
+                    Designed &amp; built by
+                    <a href="https://www.techibytesmedia.com/"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="font-semibold text-cream-200 underline decoration-clay-500/60 underline-offset-4 transition-colors hover:text-white">
+                        Techibytes Media LLC
+                    </a>
+                </p>
+            </div>
         </div>
     </div>
 </footer>

@@ -1,11 +1,10 @@
 <?php
-
 /*
  *
  *   Created by Techibytes Media Development Team
  *   Copyright Ⓒ 2026. All rights reserved, https://techibytesmedia.com/
  *   Project: st-michaels-afh
- *   Last modified: 7/20/26, 9:30 PM
+ *   Last modified: 7/20/26, 10:08 PM
  *   Modified or Created by: erigb
  *
  *   Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
@@ -19,22 +18,21 @@
 
 declare(strict_types = 1);
 
-namespace App\Models;
+use App\Mail\ContactInquiryReceived;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+test('the inquiry email identifies the sender for replies', function (): void {
+    $mail = new ContactInquiryReceived([
+        'name' => 'Jane Doe',
+        'phone' => '253-555-0100',
+        'email' => 'jane@example.com',
+        'message' => 'I would like to schedule a visit.',
+    ]);
 
-class ContactInquiry extends Model
-{
-    /** @use HasFactory<\Database\Factories\ContactInquiryFactory> */
-    use HasFactory;
+    $envelope = $mail->envelope();
 
-    protected $fillable = [
-        'name',
-        'phone',
-        'email',
-        'relationship_to_resident',
-        'care_needed',
-        'message',
-    ];
-}
+    expect($envelope->subject)
+        ->toBe('New Website Inquiry from Jane Doe')
+        ->and($envelope->replyTo)->toHaveCount(1)
+        ->and($envelope->replyTo[0]->address)->toBe('jane@example.com')
+        ->and($envelope->replyTo[0]->name)->toBe('Jane Doe');
+});

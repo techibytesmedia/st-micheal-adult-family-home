@@ -5,7 +5,7 @@
  *   Created by Techibytes Media Development Team
  *   Copyright Ⓒ 2026. All rights reserved, https://techibytesmedia.com/
  *   Project: st-michaels-afh
- *   Last modified: 7/20/26, 9:30 PM
+ *   Last modified: 7/20/26, 10:09 PM
  *   Modified or Created by: erigb
  *
  *   Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
@@ -23,7 +23,7 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use App\Models\ContactInquiry;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Envelope;
@@ -33,20 +33,24 @@ class ContactInquiryReceived extends Mailable
     use Queueable;
     use SerializesModels;
 
-    public function __construct(public ContactInquiry $inquiry) {}
+    /**
+     * @param  array{name: string, phone: string, email: string, relationship_to_resident?: ?string, care_needed?: ?string, message: string}  $inquiry
+     */
+    public function __construct(public array $inquiry) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New Website Inquiry from ' . $this->inquiry->name,
-            replyTo: [$this->inquiry->email],
+            replyTo: [new Address($this->inquiry['email'], $this->inquiry['name'])],
+            subject: 'New Website Inquiry from ' . $this->inquiry['name'],
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            markdown: 'mail.contact-inquiry-received',
+            view: 'mail.contact-inquiry-received',
+            text: 'mail.contact-inquiry-received-text',
         );
     }
 }
