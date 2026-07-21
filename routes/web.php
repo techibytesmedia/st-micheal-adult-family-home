@@ -19,6 +19,7 @@
 
 declare(strict_types = 1);
 
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ContactInquiryController;
 
@@ -28,6 +29,18 @@ Route::view('/services', 'pages.services')->name('services');
 Route::view('/our-home', 'pages.our-home')->name('our-home');
 Route::view('/faqs', 'pages.faqs')->name('faqs');
 Route::view('/contact', 'pages.contact')->name('contact');
+
+Route::get('/sitemap.xml', function (): Response {
+    $site_url = rtrim((string) config('app.url'), '/');
+    $urls = array_map(
+        fn (string $routeName): string => $site_url . route($routeName, absolute: false),
+        ['home', 'about', 'services', 'our-home', 'faqs', 'contact'],
+    );
+
+    return response()
+        ->view('sitemap', ['urls' => $urls])
+        ->header('Content-Type', 'application/xml');
+})->name('sitemap');
 
 Route::post('/contact', [ContactInquiryController::class, 'store'])
     ->middleware('throttle:10,1')

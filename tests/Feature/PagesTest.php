@@ -38,10 +38,46 @@ test('every page shows the business phone number', function (string $uri): void 
         ->assertSee(config('site.phone'));
 })->with(['/', '/about-us', '/services', '/our-home', '/faqs', '/contact']);
 
-test('the home page includes local business schema markup', function (): void {
-    $this->get('/')
+test('the home page includes valid local business and website schema', function (): void {
+    $response = $this->get('/')->assertSuccessful();
+    $html = $response->getContent();
+
+    expect(preg_match('/<script type="application\/ld\+json">\s*(.*?)\s*<\/script>/s', $html, $matches))->toBe(1);
+
+    try {
+        $schema = json_decode($matches[1], true, flags: JSON_THROW_ON_ERROR);
+    } catch (JsonException $e) {
+        $this->fail('Invalid JSON schema: ' . $e->getMessage());
+    }
+
+    expect($schema['@context'])->toBe('https://schema.org')
+        ->and($schema['@graph'][0]['@type'])->toBe('LocalBusiness')
+        ->and($schema['@graph'][0]['name'])->toBe('St. Michaels Adult Family Home LLC')
+        ->and($schema['@graph'][0]['address']['streetAddress'])->toBe('6414 South M St')
+        ->and($schema['@graph'][0]['openingHoursSpecification'][0]['opens'])->toBe('00:00')
+        ->and($schema['@graph'][0]['openingHoursSpecification'][0]['closes'])->toBe('23:59')
+        ->and($schema['@graph'][1]['@type'])->toBe('WebSite');
+});
+
+test('public pages include canonical and social metadata', function (string $uri): void {
+    $this->get($uri)
         ->assertSuccessful()
-        ->assertSee('application/ld+json', false)
-        ->assertSee('LocalBusiness', false)
-        ->assertSee('6414 South M St', false);
+        ->assertSee('<link rel="canonical"', false)
+        ->assertSee('<meta property="og:image"', false)
+        ->assertSee('<meta name="twitter:card" content="summary_large_image">', false);
+})->with(['/', '/about-us', '/services', '/our-home', '/faqs', '/contact']);
+
+test('the sitemap lists every public page', function (): void {
+    $response = $this->get('/sitemap.xml')
+        ->assertSuccessful()
+        ->assertHeader('Content-Type', 'application/xml');
+
+    foreach (['home', 'about', 'services', 'our-home', 'faqs', 'contact'] as $route_name) {
+        $response->assertSee(config('app.url') . route($route_name, absolute: false), false);
+    }
+});
+
+test('robots file advertises the sitemap', function (): void {
+    expect(file_get_contents(public_path('robots.txt')))
+        ->toContain('Sitemap: https://stmichaelsafh.com/sitemap.xml');
 });

@@ -6,17 +6,85 @@
     <meta name="color-scheme" content="light">
     <meta name="theme-color" content="#214c87">
 
+    @php
+        $siteUrl = rtrim((string) config('app.url'), '/');
+        $currentPath = '/'.ltrim(request()->path(), '/');
+        $canonicalUrl = $siteUrl.($currentPath === '/' ? '' : $currentPath);
+        $socialImageUrl = $siteUrl.'/images/6.jpeg';
+        $logoUrl = $siteUrl.'/logo/logo-1.png';
+        $structuredData = [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                [
+                    '@type' => 'LocalBusiness',
+                    '@id' => $siteUrl.'/#business',
+                    'name' => config('site.name'),
+                    'description' => 'Adult family home providing compassionate residential care in Tacoma, Washington.',
+                    'telephone' => config('site.phone_href'),
+                    'email' => config('site.email'),
+                    'url' => $siteUrl,
+                    'logo' => $logoUrl,
+                    'image' => $socialImageUrl,
+                    'hasMap' => config('site.map_link'),
+                    'openingHoursSpecification' => [
+                        [
+                            '@type' => 'OpeningHoursSpecification',
+                            'dayOfWeek' => [
+                                'Monday',
+                                'Tuesday',
+                                'Wednesday',
+                                'Thursday',
+                                'Friday',
+                                'Saturday',
+                                'Sunday',
+                            ],
+                            'opens' => '00:00',
+                            'closes' => '23:59',
+                        ],
+                    ],
+                    'address' => [
+                        '@type' => 'PostalAddress',
+                        'streetAddress' => config('site.address.street'),
+                        'addressLocality' => config('site.address.city'),
+                        'addressRegion' => config('site.address.state'),
+                        'postalCode' => config('site.address.zip'),
+                        'addressCountry' => 'US',
+                    ],
+                ],
+                [
+                    '@type' => 'WebSite',
+                    '@id' => $siteUrl.'/#website',
+                    'url' => $siteUrl,
+                    'name' => config('site.name'),
+                    'inLanguage' => 'en-US',
+                    'publisher' => ['@id' => $siteUrl.'/#business'],
+                ],
+            ],
+        ];
+    @endphp
+
     <title>@yield('title', config('site.name').' | Adult Family Home in Tacoma, WA')</title>
     <meta name="description" content="@yield('meta_description', 'St. Michaels Adult Family Home LLC provides compassionate adult family home care in Tacoma, WA. Contact us to learn about availability, services, and scheduling a visit.')">
 
     <meta property="og:site_name" content="{{ config('site.name') }}">
+    <meta property="og:locale" content="en_US">
     <meta property="og:type" content="website">
     <meta property="og:title" content="@yield('title', config('site.name').' | Adult Family Home in Tacoma, WA')">
     <meta property="og:description" content="@yield('meta_description', 'St. Michaels Adult Family Home LLC provides compassionate adult family home care in Tacoma, WA. Contact us to learn about availability, services, and scheduling a visit.')">
-    <meta property="og:image" content="{{ asset('images/6.jpeg') }}">
-    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ $socialImageUrl }}">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1600">
+    <meta property="og:image:height" content="1066">
+    <meta property="og:image:alt" content="Exterior of St. Michaels Adult Family Home in Tacoma, Washington">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
 
-    <link rel="canonical" href="{{ url()->current() }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('title', config('site.name').' | Adult Family Home in Tacoma, WA')">
+    <meta name="twitter:description" content="@yield('meta_description', 'St. Michaels Adult Family Home LLC provides compassionate adult family home care in Tacoma, WA. Contact us to learn about availability, services, and scheduling a visit.')">
+    <meta name="twitter:image" content="{{ $socialImageUrl }}">
+    <meta name="twitter:image:alt" content="Exterior of St. Michaels Adult Family Home in Tacoma, Washington">
+
+    <link rel="canonical" href="{{ $canonicalUrl }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}?v=2">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}?v=2">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}?v=2">
@@ -26,25 +94,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <script type="application/ld+json">
-    {
-        "@@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        "name": "{{ config('site.name') }}",
-        "description": "Adult family home providing compassionate residential care in Tacoma, Washington.",
-        "telephone": "{{ config('site.phone_href') }}",
-        "email": "{{ config('site.email') }}",
-        "url": "{{ url('/') }}",
-        "logo": "{{ asset('logo/logo-1.png') }}",
-        "image": "{{ asset('images/6.jpeg') }}",
-        "address": {
-            "@type": "PostalAddress",
-            "streetAddress": "{{ config('site.address.street') }}",
-            "addressLocality": "{{ config('site.address.city') }}",
-            "addressRegion": "{{ config('site.address.state') }}",
-            "postalCode": "{{ config('site.address.zip') }}",
-            "addressCountry": "US"
-        }
-    }
+    {!! json_encode($structuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}
     </script>
 </head>
 <body class="bg-white pb-16 font-sans text-stone-600 antialiased dark:bg-night-950 dark:text-navy-300 lg:pb-0">
