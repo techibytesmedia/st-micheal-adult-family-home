@@ -122,5 +122,4 @@ Built and maintained by the **Techibytes Media Development Team**.
 
 This software and its source code are proprietary and confidential. Unauthorized use, reproduction, modification, or distribution is prohibited. See [LICENSE.md](LICENSE.md) for details.
 
-© 2026 Techibytes Media LLC. All rights reserved.
-
+© Techibytes Media LLC. All rights reserved.

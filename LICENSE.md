@@ -8,6 +8,6 @@ The St. Michaels Adult Family Home name, branding, content, and approved photogr
 
 By accessing or using this software, you agree to comply with these terms. Violation of these terms may result in legal action.
 
-© 2026 Techibytes Media LLC. All rights reserved.
+© Techibytes Media LLC. All rights reserved.
 
 [techibytesmedia.com](https://techibytesmedia.com)
